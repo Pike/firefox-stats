@@ -27,7 +27,7 @@ def get_status(avt):
         .values_list('id', 'm_total')
     )
     return {
-        'version': avt.appversion.version,
+        'version': int(avt.appversion.version),
         'time': avt.end.isoformat(),
         'status': {
             loc: missing[run]

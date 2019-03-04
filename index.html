@@ -8,10 +8,15 @@
   <body>
     <div id="tester" style="width:600px;height:250px;"></div>
     <script type="text/javascript">
-      
-      TESTER = document.getElementById('tester');
+      var params = new URL(document.location).searchParams;
+      var TESTER = document.getElementById('tester');
       Plotly.d3.json('releases.json', function(releases) {
-        let transformed = releases.map(function(release, relnum) {
+        releases.forEach(release => {release.time = new Date(release.time)});
+        if (params.has('after')) {
+          let cutoff = new Date(params.get('after'));
+          releases = releases.filter(rel => rel.time > cutoff);
+        }
+        let transformed = releases.map(function(release) {
           let result = {
             name: release.version,
             time: new Date(release.time)
@@ -24,8 +29,9 @@
           return {
             name: release.version,
             type: 'surface',
+            showscale: false,
             x: uniq_vals.map(v => [v, v]),
-            y: uniq_vals.map(v => [relnum + 5, relnum + 6]),
+            y: uniq_vals.map(v => [release.version, release.version + 1]),
             z: uniq_vals.map(function(v) {
               accum += all_vals.filter(_v => _v === v).length;
               return [accum, accum];
