@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="tester" style="width:600px;height:250px;"></div>
+    <script type="text/javascript">
+      
+      TESTER = document.getElementById('tester');
+      Plotly.d3.json('releases.json', function(releases) {
+        let transformed = releases.map(function(release, relnum) {
+          let result = {
+            name: release.version,
+            time: new Date(release.time)
+          };
+          let stats = release.status;
+          let all_vals = Object.values(stats);
+          let uniq_vals = Array.from(new Set(all_vals).values());
+          uniq_vals.sort((a,b) => a-b);
+          let accum = 0;
+          return {
+            name: release.version,
+            type: 'surface',
+            x: uniq_vals.map(v => [v, v]),
+            y: uniq_vals.map(v => [relnum + 5, relnum + 6]),
+            z: uniq_vals.map(function(v) {
+              accum += all_vals.filter(_v => _v === v).length;
+              return [accum, accum];
+            })
+          };
+        });
+        var layout = {
+          title: 'Ribbon Plot',
+          showlegend: false,
+          autosize: true,
+          width: 1200,
+          height: 800,
+          scene: {
+            xaxis: {title: 'Missing'},
+            yaxis: {title: 'Release'},
+            zaxis: {title: 'Locales'}
+          }
+        };
+      	Plotly.plot(
+          TESTER,
+          transformed,
+          layout
+        );
+      });
+    </script>
+  </body>
+</html>
